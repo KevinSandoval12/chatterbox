@@ -127,7 +127,32 @@ public class ChatterboxClient {
     public static ChatterboxOptions parseArgs(String[] args) throws IllegalArgumentException {
         // TODO: read args in the required order and return new ChatterboxOptions(host, port, username, password)
         // Remove this exception
-        throw new UnsupportedOperationException("Argument parsing not yet implemented. Implement parseArgs and remove this exception");
+
+        //  Edge Case args.length must equal 4 (Host, Port, Username, Password)
+        if (args.length != 4) {
+            throw new IllegalArgumentException("Arg length is not equal 4.");
+        }
+
+        // Grabbing Options from Array
+        String host = args[0];
+
+        // Parsing through port turning it into int
+        int port;
+        // try catch to check for strings in port number
+        try {
+            port = Integer.parseInt(args[1]);
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Port must be a number");
+        }
+        // if statement to check if port is between 1-65535
+        if (port < 1 || port > 65535) {
+            throw new IllegalArgumentException("PORT must be between 1-65535");
+        }
+        String username = args[2];
+        String password = args[3];
+
+
+        return new ChatterboxOptions(host, port, username, password);
     }
 
     /**
