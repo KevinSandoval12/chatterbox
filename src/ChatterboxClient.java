@@ -2,7 +2,10 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
@@ -192,10 +195,37 @@ public class ChatterboxClient {
      * @throws IOException if the socket cannot be opened
      */
     public void connect() throws IOException {
-        throw new UnsupportedOperationException("Connect not yet implemented. Implement connect() and remove this exception!");
+        // Input: Bytes -> Character -> BufferReader
+        // Ouput: Bytes -> Character -> Text
 
-        // Make sure to have this.serverReader and this.serverWriter set by the end of this method!
-        // hint: get the streams from the sockets, use those to create the InputStreamReader/OutputStreamWriter and the BufferedReader/BufferedWriter
+        // Making new Client that connects to a server at host and port given
+        // After succeeding you can exchange bytes with the server
+        Socket socket = new Socket(host, port);
+
+ 
+            // Getting input stream byte data FROM SERVER
+            InputStream inputStream = socket.getInputStream();
+            // Turning byte data into characters (Raw Data)
+            // Convert Raw Data into Character with UTF-8 (a Character Decoder)
+            InputStreamReader inputStreamReader = new InputStreamReader(inputStream, java.nio.charset.StandardCharsets.UTF_8);
+            // Wrap the reader in a buffer (Gives me readLines() methods)
+            BufferedReader bufferedReader = new BufferedReader(inputStreamReader); 
+
+            // Getting Raw Data to SEND bytes to the server
+            OutputStream outputStream = socket.getOutputStream();
+            // Wrap the Byte Stream to Characters in UTF-8 bytes
+            OutputStreamWriter outputStreamWriter = new OutputStreamWriter(outputStream, java.nio.charset.StandardCharsets.UTF_8);
+            // Buffer the writer so I can write text better
+            BufferedWriter bufferedWriter = new BufferedWriter(outputStreamWriter);
+            
+            // Make sure to have this.serverReader and this.serverWriter set by the end of this method!
+            // hint: get the streams from the sockets, use those to create the InputStreamReader/OutputStreamWriter and the BufferedReader/BufferedWriter
+            
+            this.serverReader = bufferedReader;
+            this.serverWriter = bufferedWriter;
+
+
+
     }
 
     /**
