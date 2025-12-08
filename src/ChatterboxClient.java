@@ -220,12 +220,8 @@ public class ChatterboxClient {
             
             // Make sure to have this.serverReader and this.serverWriter set by the end of this method!
             // hint: get the streams from the sockets, use those to create the InputStreamReader/OutputStreamWriter and the BufferedReader/BufferedWriter
-            
             this.serverReader = bufferedReader;
             this.serverWriter = bufferedWriter;
-
-
-
     }
 
     /**
@@ -249,9 +245,37 @@ public class ChatterboxClient {
      * @throws IllegalArgumentException for bad credentials / server rejection
      */
     public void authenticate() throws IOException, IllegalArgumentException {
-        throw new UnsupportedOperationException("Authenticate not yet implemented. Implement authenticate() and remove this exception!");
         // Hint: use the username/password instance variables, DO NOT READ FROM userInput
         // send messages using serverWriter (don't forget to flush!)
+
+
+        // read server message
+        // if no message throw IOException
+        String welcome = this.serverReader.readLine();
+        // 
+        if (welcome == null) {
+            throw new IOException("Server before Authentication");
+        }
+
+        // Print the prompt to the userOutput
+        userOutput.write((welcome + "\n").getBytes(StandardCharsets.UTF_8));
+        userOutput.flush();
+
+        // Send username and password and create newline
+        String credentials = username + " " + password + "\n";
+        serverWriter.write(credentials);
+        serverWriter.flush();
+
+        // Read Server response
+        String response = serverReader.readLine();
+        if (response == null) {
+            throw new IOException("Closed connection after Credentials");
+        }
+
+        // Print the welcome messgae to user
+        userOutput.write((response + "\n").getBytes(StandardCharsets.UTF_8));
+        userOutput.flush();
+        
     }
 
     /**
