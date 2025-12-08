@@ -254,7 +254,7 @@ public class ChatterboxClient {
         String welcome = this.serverReader.readLine();
         // 
         if (welcome == null) {
-            throw new IOException("Server before Authentication");
+            throw new IOException("Server stopped before Authentication");
         }
 
         // Print the prompt to the userOutput
@@ -272,7 +272,7 @@ public class ChatterboxClient {
             throw new IOException("Closed connection after Credentials");
         }
 
-        // Print the welcome messgae to user
+        // Print the response message to user
         userOutput.write((response + "\n").getBytes(StandardCharsets.UTF_8));
         userOutput.flush();
         
@@ -291,7 +291,8 @@ public class ChatterboxClient {
      * @throws IOException
      */
     public void streamChat() throws IOException {
-        throw new UnsupportedOperationException("Chat streaming not yet implemented. Implement streamChat() and remove this exception!");
+        printIncomingChats();
+
     }
 
     /**
@@ -311,6 +312,29 @@ public class ChatterboxClient {
     public void printIncomingChats() {
         // Listen on serverReader
         // Write to userOutput, NOT System.out
+
+        // wrap IO try catch becasuse write() and readLine() can throw IOException
+        try {
+            // Create line field to store temporary incoming lines
+            String line; 
+
+            // while line is NOT null or is not disconnected
+            while ((line = serverReader.readLine()) != null) {
+                userOutput.write((line + "\n").getBytes(StandardCharsets.UTF_8));
+                userOutput.flush();
+            }
+            
+            // get the raw bytes, convert
+            userOutput.write(("Server disconnected. \n").getBytes(StandardCharsets.UTF_8));
+            userOutput.flush();
+            System.exit(0);
+        } catch (IOException e) {
+            try {
+                userOutput.write(("Connection lost: " + e.getMessage() + "\n").getBytes(StandardCharsets.UTF_8));
+                userOutput.flush();
+            } catch (IOException ignored) { }
+            System.exit(1);
+        }
     }
 
     /**
