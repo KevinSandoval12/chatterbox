@@ -9,6 +9,8 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
+import javax.imageio.IIOException;
+
 /**
  * A simple command-line chat client for the Chatterbox server.
  *
@@ -50,6 +52,7 @@ public class ChatterboxClient {
      *
      * Example:
      *   javac src/*.java && java -cp src ChatterboxClient localhost 12345 sharon abc123
+     *
      *
      * This method is already complete. Your work is in the TODO methods below.
      */
@@ -291,8 +294,14 @@ public class ChatterboxClient {
      * @throws IOException
      */
     public void streamChat() throws IOException {
-        printIncomingChats();
+        // Thread #1 for: Incoming Messages
+        Thread incoming = new Thread(() -> printIncomingChats());
 
+        // Thread #2 for: Outgoing Messages
+        Thread outgoing = new Thread(() -> sendOutgoingChats());
+
+        incoming.start();
+        outgoing.start();
     }
 
     /**
@@ -353,6 +362,32 @@ public class ChatterboxClient {
         // Use the userInput to read, NOT System.in directly
         // loop forever reading user input
         // write to serverOutput
+
+        try {
+            while (true) {
+                // if user has a new line
+                if (userInput.hasNextLine()){
+                    // make line the new user's message
+                    String line = userInput.nextLine();
+
+                    // write it to serverWrite
+                    serverWriter.write(line + "\n");
+                    // flush to display it instead of having it in buffer
+                    serverWriter.flush();
+
+                    // NO System.exit(0) because we dont want to exit the whole program
+                    // we need controlled stopping of program
+                }
+            }
+        } catch (IOException e) {
+            try {
+                userOutput.write(("Lost connection while sending: " + e.getMessage() + "\n").getBytes(StandardCharsets.UTF_8));
+                userOutput.flush();
+            } catch (IOException ignored) {}
+
+            System.exit(1);
+            }
+        
     }
 
     public String getHost() {
